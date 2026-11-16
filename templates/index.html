@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <title>Облачный каталог</title>
+  <style>
+    body { font-family: Arial, sans-serif; max-width: 960px; margin: 30px auto; padding: 0 16px; }
+    form { background: #f3f5f7; padding: 16px; border-radius: 8px; }
+    input, textarea { width: 100%; margin: 6px 0 12px; padding: 8px; box-sizing: border-box; }
+    table { width: 100%; border-collapse: collapse; margin-top: 16px; }
+    th, td { border-bottom: 1px solid #ddd; padding: 8px; text-align: left; vertical-align: middle; }
+    .host, .hint { color: #777; font-size: 13px; }
+    img { height: 72px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h1>Облачный каталог фильмов — Smith, v2</h1>
+  <p class="host">Запрос обработал контейнер: {{ host }}</p>
+
+  <form action="/add" method="post" enctype="multipart/form-data">
+    <label>Название *</label>
+    <input name="title" required>
+    <label>Описание</label>
+    <textarea name="description" rows="3"></textarea>
+    <label>Год выпуска</label>
+    <input name="year" type="number" min="1888" max="2100">
+    <label>Постер: файл (до 10 МБ)</label>
+    <input type="file" name="file">
+    <label>или ссылка на картинку (URL)</label>
+    <input name="poster_url" type="url" placeholder="https://.../poster.jpg">
+    <p class="hint">Если выбран файл, ссылка игнорируется. Картинка по ссылке копируется в S3.</p>
+    <button type="submit">Добавить</button>
+  </form>
+
+  <h2>Записи ({{ items|length }})</h2>
+  <table>
+    <tr><th>Дата (UTC)</th><th>Название</th><th>Описание</th><th>Год</th><th>Постер</th></tr>
+    {% for it in items %}
+    <tr>
+      <td>{{ it.created_at }}</td>
+      <td>{{ it.title }}</td>
+      <td>{{ it.description }}</td>
+      <td>{{ it.year }}</td>
+      <td>{% if it.file_key %}<a href="/file/{{ it.id }}" target="_blank"><img src="/file/{{ it.id }}" alt="{{ it.file_name }}"></a>{% else %}—{% endif %}</td>
+    </tr>
+    {% else %}
+    <tr><td colspan="5">Записей пока нет</td></tr>
+    {% endfor %}
+  </table>
+</body>
+</html>
